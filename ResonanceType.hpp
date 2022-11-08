@@ -5,15 +5,11 @@
 class ResonanceType : public ParticleType {
     public:
     ResonanceType(std::string const&, double, int, double);
-    double GetWidth() const;
+    double GetWidth() const override;
     void Print() const override;
     private:
     double const fWidth;
 
 };
-
-
-
-
 
 #endif

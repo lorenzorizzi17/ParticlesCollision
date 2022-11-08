@@ -1,6 +1,7 @@
 #include "ParticleType.hpp"
 
 
+
 ParticleType::ParticleType(std::string const& Name, double Mass, int Charge) : fName{Name}, fMass{Mass}, fCharge{Charge} {}
 std::string ParticleType::GetName() const {
     return fName;
@@ -18,4 +19,4 @@ void ParticleType::Print() const {
 
 double ParticleType::GetWidth() const {
     return 0;
-}
+};
