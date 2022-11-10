@@ -40,9 +40,8 @@ void Draw() {
     HistoInvMassDecayed->Sumw2();
     std::array<Particle,120> Particles;
 
-    for (int i = 0; i < 1E5; i++)
+    for (int i = 0; i < 1E4; i++)
     {
-        Particle* LastInstance;
         for (int j = 0; j < 100; j++)
         {
             //generating a generic particle
@@ -79,21 +78,12 @@ void Draw() {
                 particle.SetIndex("K*");
                 HistoParticleType->Fill(6);
             }
-            HistoParticleType->Fill(5);
             HistoPhi->Fill(phi);
+            HistoTheta->Fill(theta);
             HistoMomentum->Fill(pmod);
             HistoTransverseMomentum->Fill(std::sqrt(px*px+py*py));
             HistoEnergy->Fill(particle.GetEnergy());
             Particles[j] = particle;
-        }
-        //computing the invariant mass of all the generated particles
-        for (int i = 0; i < 100; i++)
-        {
-            for (int j = 0; j < i; j++)
-            {
-                double inv_mass = Particles[i].InvMass(Particles[j]);
-                HistoInvMass->Fill(inv_mass);
-            }
         }
         
         int k = 100;
@@ -122,26 +112,31 @@ void Draw() {
             }
         }
 
-        //computing the invariant mass
+        //computing the invariant mass ignoring K* particles that decayed
         for (int i = 0; i < k; i++)
         {
-            for (int j = 0; j < i; j++)
+            for (int j = i; j < k; j++)
             {
+                if (j!=i) {
                     double inv_mass = Particles[i].InvMass(Particles[j]);
+                    if ((Particles[j].GetName() != "K*")&&(Particles[i].GetName() != "K*")) {
+                        HistoInvMass->Fill(inv_mass);
+                    }
                     //Here goes concordant/discordant particles
                     if (Particles[i].GetCharge()*Particles[j].GetCharge() > 0){
-                        HistoInvMassConcordi->Fill(inv_mass);
+                        HistoInvMassConcordi->Fill(inv_mass,0.5);
                     } else if ((Particles[i].GetCharge()*Particles[j].GetCharge() < 0)){
-                        HistoInvMassDiscordi->Fill(inv_mass);
+                        HistoInvMassDiscordi->Fill(inv_mass,0.5);
                     }
 
                     //Checking for Pi+/K- combination
                     if(((Particles[i].GetName() == "Pi+")&&(Particles[j].GetName()=="K-"))||((Particles[i].GetName() == "K-")&&(Particles[j].GetName()=="Pi+"))){
-                        HistoInvMassPionPKaonN->Fill(inv_mass);
+                        HistoInvMassPionPKaonN->Fill(inv_mass,0.5);
                     }
                     if(((Particles[i].GetName() == "Pi-")&&(Particles[j].GetName()=="K+"))||((Particles[i].GetName() == "K+")&&(Particles[j].GetName()=="Pi-"))){
-                        HistoInvMassPionNKaonP->Fill(inv_mass);
+                        HistoInvMassPionNKaonP->Fill(inv_mass,0.5);
                     }
+                }
              }
         }
         
