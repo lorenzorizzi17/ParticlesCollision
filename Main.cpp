@@ -3,6 +3,7 @@
 #include"TH1F.h"
 #include<vector>
 #include"TCanvas.h"
+#include"TFile.h"
 
 void Draw() {
     
@@ -16,6 +17,7 @@ void Draw() {
 
     gRandom->SetSeed();
     TCanvas* Canvas = new TCanvas("c","c", 1400,800);
+    TFile* File = new TFile("Particles.root","RECREATE");
     Canvas->Divide(4,2);
     
 
@@ -31,8 +33,14 @@ void Draw() {
     TH1F* HistoInvMassPionPKaonN = new TH1F("Inv. mass distr. Pi+/K-", "Inv. mass distr. Pi+/K-", 10000,0,6);
     TH1F* HistoInvMassPionNKaonP = new TH1F("Inv. mass distr. Pi-/K+", "Inv. mass distr. Pi-/K+", 10000,0,6);
     TH1F* HistoInvMassDecayed = new TH1F("Inv. mass distr. decayed", "Inv. mass distr. decayed",1000,0.5,1.5);
+    HistoInvMassConcordi->Sumw2();
+    HistoInvMassDiscordi->Sumw2();
+    HistoInvMassPionPKaonN->Sumw2();
+    HistoInvMassPionNKaonP->Sumw2();
+    HistoInvMassDecayed->Sumw2();
     std::array<Particle,120> Particles;
-    for (int i = 0; i < 1E4; i++)
+
+    for (int i = 0; i < 1E5; i++)
     {
         Particle* LastInstance;
         for (int j = 0; j < 100; j++)
@@ -52,54 +60,44 @@ void Draw() {
             if (test < 0.4) {
                 particle.SetIndex("Pi+");
                 HistoParticleType->Fill(0);
-                HistoPhi->Fill(phi);
-                HistoMomentum->Fill(pmod);
-                HistoTransverseMomentum->Fill(std::sqrt(px*px+py*py));
-                HistoEnergy->Fill(particle.GetEnergy());
             } else if (test<0.8) {
                 particle.SetIndex("Pi-");
                 HistoParticleType->Fill(1);
-                HistoPhi->Fill(phi);
-                HistoMomentum->Fill(pmod);
-                HistoTransverseMomentum->Fill(std::sqrt(px*px+py*py));
-                HistoEnergy->Fill(particle.GetEnergy());
             } else if (test < 0.85) {
                 particle.SetIndex("K+");
                 HistoParticleType->Fill(2);
-                HistoPhi->Fill(phi);
-                HistoMomentum->Fill(pmod);
-                HistoTransverseMomentum->Fill(std::sqrt(px*px+py*py));
-                HistoEnergy->Fill(particle.GetEnergy());
             } else if (test < 0.9) {
                 particle.SetIndex("K-");
                 HistoParticleType->Fill(3);
-                HistoPhi->Fill(phi);
-                HistoMomentum->Fill(pmod);
-                HistoTransverseMomentum->Fill(std::sqrt(px*px+py*py));
-                HistoEnergy->Fill(particle.GetEnergy());
             } else if (test <0.945) {
                 particle.SetIndex("P+");
                 HistoParticleType->Fill(4);
-                HistoPhi->Fill(phi);
-                HistoMomentum->Fill(pmod);
-                HistoTransverseMomentum->Fill(std::sqrt(px*px+py*py));
-                HistoEnergy->Fill(particle.GetEnergy());
             } else if (test < 0.99) {
                 particle.SetIndex("P-");
                 HistoParticleType->Fill(5);
-                HistoPhi->Fill(phi);
-                HistoMomentum->Fill(pmod);
-                HistoTransverseMomentum->Fill(std::sqrt(px*px+py*py));
-                HistoEnergy->Fill(particle.GetEnergy());
             } else {
                 particle.SetIndex("K*");
                 HistoParticleType->Fill(6);
             }
+            HistoParticleType->Fill(5);
+            HistoPhi->Fill(phi);
+            HistoMomentum->Fill(pmod);
+            HistoTransverseMomentum->Fill(std::sqrt(px*px+py*py));
+            HistoEnergy->Fill(particle.GetEnergy());
             Particles[j] = particle;
-            LastInstance = &particle;
         }
+        //computing the invariant mass of all the generated particles
+        for (int i = 0; i < 100; i++)
+        {
+            for (int j = 0; j < i; j++)
+            {
+                double inv_mass = Particles[i].InvMass(Particles[j]);
+                HistoInvMass->Fill(inv_mass);
+            }
+        }
+        
         int k = 100;
-        //checking for K* particles
+        //checking for K* particles to make them decay 
         for (int i{0}; i < 100; i++) {
             if (Particles[i].GetName() == "K*") {
                 //making the K*  particle decay
@@ -111,16 +109,6 @@ void Draw() {
                     Particles[k] = PioneP;
                     Particles[k+1] = KaoneN; 
                     k = k+2;
-                    double PionePMomentum = sqrt(PioneP.GetPx()*PioneP.GetPx()+PioneP.GetPy()*PioneP.GetPy()+PioneP.GetPz()*PioneP.GetPz());
-                    double KaoneNMomentum = sqrt(KaoneN.GetPx()*KaoneN.GetPx()+KaoneN.GetPy()*KaoneN.GetPy()+KaoneN.GetPz()*KaoneN.GetPz());
-                    double PionePTransverseMomentum = sqrt(PioneP.GetPx()*PioneP.GetPx()+PioneP.GetPy()*PioneP.GetPy());
-                    double KaoneNTransverseMomentum = sqrt(KaoneN.GetPx()*KaoneN.GetPx()+KaoneN.GetPy()*KaoneN.GetPy());
-                    HistoMomentum->Fill(PionePMomentum);
-                    HistoMomentum->Fill(KaoneNMomentum);
-                    HistoTransverseMomentum->Fill(PionePTransverseMomentum);
-                    HistoTransverseMomentum->Fill(KaoneNTransverseMomentum);
-                    HistoEnergy->Fill(PioneP.GetEnergy());
-                    HistoEnergy->Fill(KaoneN.GetEnergy());
                     HistoInvMassDecayed->Fill(PioneP.InvMass(KaoneN));
                 } else {
                     Particle PioneN = Particle("Pi-");
@@ -129,42 +117,32 @@ void Draw() {
                     Particles[k] = PioneN;
                     Particles[k+1] = KaoneP; 
                     k = k+2;
-                    double PioneNMomentum = sqrt(PioneN.GetPx()*PioneN.GetPx()+PioneN.GetPy()*PioneN.GetPy()+PioneN.GetPz()*PioneN.GetPz());
-                    double KaonePMomentum = sqrt(KaoneP.GetPx()*KaoneP.GetPx()+KaoneP.GetPy()*KaoneP.GetPy()+KaoneP.GetPz()*KaoneP.GetPz());
-                    double PioneNTransverseMomentum = sqrt(PioneN.GetPx()*PioneN.GetPx()+PioneN.GetPy()*PioneN.GetPy());
-                    double KaonePTransverseMomentum = sqrt(KaoneP.GetPx()*KaoneP.GetPx()+KaoneP.GetPy()*KaoneP.GetPy());
-                    HistoMomentum->Fill(PioneNMomentum);
-                    HistoMomentum->Fill(KaonePMomentum);
-                    HistoTransverseMomentum->Fill(PioneNTransverseMomentum);
-                    HistoTransverseMomentum->Fill(KaonePTransverseMomentum);
-                    HistoEnergy->Fill(PioneN.GetEnergy());
-                    HistoEnergy->Fill(KaoneP.GetEnergy());
                     HistoInvMassDecayed->Fill(PioneN.InvMass(KaoneP));
                 }
             }
         }
-        //computing the inv mass
+
+        //computing the invariant mass
         for (int i = 0; i < k; i++)
         {
-            for (int j = 0; j < k; j++)
+            for (int j = 0; j < i; j++)
             {
-                if ((i!=j)&&(Particles[i].GetName() != "K*")&&(Particles[j].GetName() != "K*")) {
                     double inv_mass = Particles[i].InvMass(Particles[j]);
-                    HistoInvMass->Fill(inv_mass);
-                    if (Particles[i].GetCharge() *Particles[j].GetCharge() > 0){
+                    //Here goes concordant/discordant particles
+                    if (Particles[i].GetCharge()*Particles[j].GetCharge() > 0){
                         HistoInvMassConcordi->Fill(inv_mass);
-                    } else {
+                    } else if ((Particles[i].GetCharge()*Particles[j].GetCharge() < 0)){
                         HistoInvMassDiscordi->Fill(inv_mass);
                     }
 
-                    if((Particles[i].GetName() == "Pi+")&&(Particles[j].GetName()=="K-")){
+                    //Checking for Pi+/K- combination
+                    if(((Particles[i].GetName() == "Pi+")&&(Particles[j].GetName()=="K-"))||((Particles[i].GetName() == "K-")&&(Particles[j].GetName()=="Pi+"))){
                         HistoInvMassPionPKaonN->Fill(inv_mass);
                     }
-                    if((Particles[i].GetName() == "Pi-")&&(Particles[j].GetName()=="K+")){
+                    if(((Particles[i].GetName() == "Pi-")&&(Particles[j].GetName()=="K+"))||((Particles[i].GetName() == "K+")&&(Particles[j].GetName()=="Pi-"))){
                         HistoInvMassPionNKaonP->Fill(inv_mass);
                     }
-                }
-            }
+             }
         }
         
 
@@ -186,4 +164,7 @@ void Draw() {
     HistoInvMassConcordi->Draw();
     Canvas->cd(8);
     HistoInvMassDiscordi->Draw();
+
+    File->Write();
+    File->Close();
 }
