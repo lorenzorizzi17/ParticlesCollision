@@ -21,26 +21,26 @@ void Draw() {
     Canvas->Divide(4,2);
     
 
-    TH1F* HistoPhi = new TH1F("Azimuthal angle", "Azimuthal angle", 10000,0,2*M_PI);
-    TH1F* HistoTheta = new TH1F("Polar angle", "Polar angle", 10000,0,M_PI);
+    TH1F* HistoPhi = new TH1F("Azimuthal angle", "Azimuthal angle", 1000,0,2*M_PI);
+    TH1F* HistoTheta = new TH1F("Polar angle", "Polar angle", 1000,0,M_PI);
     TH1F* HistoParticleType = new TH1F("Particle type", "Particle type",7,0,7);
     TH1F* HistoMomentum = new TH1F("Momentum distribution", "Momentum distribution", 1000,0,6);
-    TH1F* HistoTransverseMomentum = new TH1F("Transverse momentum", "Transverse momentum",1000,0,4);
+    TH1F* HistoTransverseMomentum = new TH1F("Transverse momentum distribution", "Transverse momentum distribution",1000,0,4);
     TH1F* HistoEnergy = new TH1F("Energy distribution", "Energy distribution", 1000, 0, 3);
     TH1F* HistoInvMass = new TH1F("Invariant mass distribution", "Invariant mass distribution", 10000,0,6);
-    TH1F* HistoInvMassConcordi = new TH1F("Inv. mass distribution concordi", "Inv. mass distribution concordi",10000,0,6);
-    TH1F* HistoInvMassDiscordi = new TH1F("Inv. mass distribution discordi", "Inv. mass distribution discordi",10000,0,6);
-    TH1F* HistoInvMassPionPKaonN = new TH1F("Inv. mass distr. Pi+/K-", "Inv. mass distr. Pi+/K-", 10000,0,6);
-    TH1F* HistoInvMassPionNKaonP = new TH1F("Inv. mass distr. Pi-/K+", "Inv. mass distr. Pi-/K+", 10000,0,6);
-    TH1F* HistoInvMassDecayed = new TH1F("Inv. mass distr. decayed", "Inv. mass distr. decayed",1000,0.5,1.5);
+    TH1F* HistoInvMassConcordi = new TH1F("Inv. mass distr. concordant particles", "Inv. mass distr. concordant particles",160,0,3);
+    TH1F* HistoInvMassDiscordi = new TH1F("Inv. mass distr. discordant particles", "Inv. mass distr. discordant particles",160,0,3);
+    TH1F* HistoInvMassPionKaonConcordi = new TH1F("Inv. mass distr. concordant Pi and K particles", "Inv. mass distr. concordant Pi and K particles", 160,0,3);
+    TH1F* HistoInvMassPionKaonDiscordi = new TH1F("Inv. mass distr. discordant Pi and K particles", "Inv. mass distr. discordant Pi and K particles", 160,0,3);
+    TH1F* HistoInvMassDecayed = new TH1F("Inv. mass distr. daughter particles", "Inv. mass distr. daughter particles",160,0.5,1.5);
     HistoInvMassConcordi->Sumw2();
     HistoInvMassDiscordi->Sumw2();
-    HistoInvMassPionPKaonN->Sumw2();
-    HistoInvMassPionNKaonP->Sumw2();
+    HistoInvMassPionKaonConcordi->Sumw2();
+    HistoInvMassPionKaonDiscordi->Sumw2();
     HistoInvMassDecayed->Sumw2();
     std::array<Particle,120> Particles;
 
-    for (int i = 0; i < 1E4; i++)
+    for (int i = 0; i < 1E5; i++)
     {
         for (int j = 0; j < 100; j++)
         {
@@ -123,18 +123,22 @@ void Draw() {
                         HistoInvMass->Fill(inv_mass);
                     }
                     //Here goes concordant/discordant particles
-                    if (Particles[i].GetCharge()*Particles[j].GetCharge() > 0){
-                        HistoInvMassConcordi->Fill(inv_mass,0.5);
+                    if ((Particles[i].GetCharge()*Particles[j].GetCharge() > 0)&&(((Particles[j].GetName() != "K*")&&(Particles[i].GetName() != "K*")))){
+                        HistoInvMassConcordi->Fill(inv_mass);
+                        if(((Particles[i].GetName() == "Pi+")&&(Particles[j].GetName()=="K+"))||((Particles[i].GetName() == "K+")&&(Particles[j].GetName()=="Pi+"))){
+                        HistoInvMassPionKaonConcordi->Fill(inv_mass);
+                        }
+                        if(((Particles[i].GetName() == "Pi-")&&(Particles[j].GetName()=="K-"))||((Particles[i].GetName() == "K-")&&(Particles[j].GetName()=="Pi-"))){
+                        HistoInvMassPionKaonConcordi->Fill(inv_mass);
+                        }
                     } else if ((Particles[i].GetCharge()*Particles[j].GetCharge() < 0)){
-                        HistoInvMassDiscordi->Fill(inv_mass,0.5);
-                    }
-
-                    //Checking for Pi+/K- combination
-                    if(((Particles[i].GetName() == "Pi+")&&(Particles[j].GetName()=="K-"))||((Particles[i].GetName() == "K-")&&(Particles[j].GetName()=="Pi+"))){
-                        HistoInvMassPionPKaonN->Fill(inv_mass,0.5);
-                    }
-                    if(((Particles[i].GetName() == "Pi-")&&(Particles[j].GetName()=="K+"))||((Particles[i].GetName() == "K+")&&(Particles[j].GetName()=="Pi-"))){
-                        HistoInvMassPionNKaonP->Fill(inv_mass,0.5);
+                        HistoInvMassDiscordi->Fill(inv_mass);
+                        if(((Particles[i].GetName() == "Pi+")&&(Particles[j].GetName()=="K-"))||((Particles[i].GetName() == "K-")&&(Particles[j].GetName()=="Pi+"))){
+                        HistoInvMassPionKaonDiscordi->Fill(inv_mass);
+                        }
+                        if(((Particles[i].GetName() == "Pi-")&&(Particles[j].GetName()=="K+"))||((Particles[i].GetName() == "K+")&&(Particles[j].GetName()=="Pi-"))){
+                        HistoInvMassPionKaonDiscordi->Fill(inv_mass);
+                        }
                     }
                 }
              }
@@ -144,9 +148,9 @@ void Draw() {
 
     }
     Canvas->cd(1);
-    HistoInvMassPionPKaonN->Draw();
+    HistoInvMassPionKaonDiscordi->Draw();
     Canvas->cd(2);
-    HistoInvMassPionNKaonP->Draw();
+    HistoInvMassPionKaonConcordi->Draw();
     Canvas->cd(3);
     HistoInvMassDecayed->Draw();
     Canvas->cd(4);
