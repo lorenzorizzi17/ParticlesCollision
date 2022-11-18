@@ -5,20 +5,24 @@
 #include <cmath>  // for M_PI
 #include <cstdlib> //for RAND_MAX
 
+//setting static member
 std::vector<ParticleType *> Particle::fParticleType{};
+int Particle::fMaxNumParticleType = 10;
 
+//default constructor
 Particle::Particle() {
     fIndex = -1;
 }
 
+//parametric constructor
 Particle::Particle(std::string const &Name, double Px, double Py, double Pz) : fPx{Px}, fPy{Py}, fPz{Px}
 {
     fIndex = FindParticle(Name);
 }
 
+//private method FindParticle. If no correspondace is found, an error will occur and fIndex will be set to -1
 int Particle::FindParticle(std::string const &s)
 {
-    // algorithm
     int counter = 0;
     for (auto it = fParticleType.begin(); it != fParticleType.end(); ++it)
     {
@@ -28,11 +32,20 @@ int Particle::FindParticle(std::string const &s)
         }
         counter++;
     }
-    throw std::runtime_error{"The desired particle does not exist. Try again"};
+    std::cout << "The desired particle does not exist. Try again (setting temporarily index to -1)";
+    return -1;
 };
 
-void Particle::AddParticleType(std::string const &Name, double Mass, int Charge, double Width)
+//getter for particle's index
+int Particle::GetIndex() const
 {
+    return fIndex;
+}
+
+//AddParticle method
+void Particle::AddParticleType(std::string const& Name, double Mass, int Charge, double Width)
+{
+    //searchs if input ParticleType already exists
     auto it = std::find_if(fParticleType.begin(), fParticleType.end(), [&](ParticleType *p)
                            { return p->GetName() == Name; });
     if (it == fParticleType.end())
@@ -52,11 +65,7 @@ void Particle::AddParticleType(std::string const &Name, double Mass, int Charge,
     }
 }
 
-int Particle::GetIndex() const
-{
-    return fIndex;
-}
-
+//fIndex setter
 void Particle::SetIndex(int Index)
 {
     
@@ -70,6 +79,7 @@ void Particle::SetIndex(int Index)
     }
 }
 
+//overloaded fIndex setter
 void Particle::SetIndex(std::string const &s)
 {
     auto it = std::find_if(fParticleType.begin(), fParticleType.end(), [&](ParticleType *p)
@@ -82,9 +92,10 @@ void Particle::SetIndex(std::string const &s)
     }
 }
 
+//Printing the Particle vector
 void Particle::PrintParticleVector()
 {
-    std::cout << "\nYou requested the particle type list\n";
+    std::cout<<'\n';
     for (auto it = fParticleType.begin(); it != fParticleType.end(); ++it)
     {
         (*it)->Print();
@@ -92,16 +103,16 @@ void Particle::PrintParticleVector()
     }
 }
 
+//Printing informations about current particle
 void Particle::PrintParticleInfo() const
 {
-    std::cout << "*******************************************************" << '\n';
     std::cout << "Particle index: " << fIndex << '\n'
               << "Particle's name: " << fParticleType[fIndex]->GetName();
     std::cout << '\n'
               << "Particle's momentum: (" << fPx << ", " << fPy << ", " << fPz << ")" << '\n';
-    std::cout << "*******************************************************" << '\n';
 }
 
+//getters (charge, momentum, name, mass, energy, invariant mass)
 int Particle::GetCharge() const {
     return fParticleType[fIndex]->GetCharge();
 }
@@ -137,6 +148,7 @@ double Particle::InvMass(Particle const& p) const {
     return sqrt(E-modp2);
 }
 
+//momentum setter
 void Particle::SetP(double px, double py, double pz) {
         fPx = px;
         fPy = py;

@@ -31,6 +31,7 @@ class Particle {
 
     private:
     static std::vector<ParticleType*> fParticleType;
+    static int fMaxNumParticleType;
     int fIndex;
     double fPx, fPy, fPz;
     static int FindParticle(std::string const&);

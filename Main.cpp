@@ -38,6 +38,7 @@ void Draw() {
     HistoInvMassPionKaonConcordant->Sumw2();
     HistoInvMassPionKaonDiscordant->Sumw2();
     HistoInvMassDecayed->Sumw2();
+    
     std::array<Particle,120> Particles;
 
     for (int i = 0; i < 1E5; i++)
