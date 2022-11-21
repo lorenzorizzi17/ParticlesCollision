@@ -2,3 +2,6 @@
 *.so
 *.pcm
 *.out
+*.C
+*.root
+*.pdf
