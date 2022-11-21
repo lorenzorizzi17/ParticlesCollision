@@ -6,6 +6,13 @@
 #include"TFile.h"
 #include"TF1.h"
 
+void setStyle(TH1F* h, const char* title, const char* XaxisName){
+    h->SetTitle(title);
+    h->GetYaxis()->SetTitle("Entries");
+    h->GetXaxis()->SetTitle(XaxisName);
+    h->SetFillColor(33);
+    h->SetLineColor(4);
+}
 
 void analysis() {
     TFile* Histograms = new TFile("Particles.root");
@@ -76,19 +83,14 @@ void analysis() {
     Gaus->SetParameter(1,0.9);
     Gaus->SetParameter(2,0.5);
 
-    TCanvas* c1 = new TCanvas("Invariant mass of concordant particles","Invariant mass of concordant particles",800,600);
-    HistoInvMassConcordant->GetYaxis()->SetTitle("Invariant mass (GeV/c^2)");
-    HistoInvMassConcordant->GetXaxis()->SetTitle("Entries");
-    HistoInvMassConcordant->SetFillColor(kBlue);
-    HistoInvMassConcordant->Draw("HIST");
+    TCanvas* c1 = new TCanvas("Invariant mass of distribution concordant particles","Invariant mass distribution of concordant particles",800,600);
+    setStyle(HistoInvMassConcordant,"Invariant mass distribution of concordant particles","Invariant mass (GeV/c^2)");
     c1->Print("Invariant mass of concordant particles.pdf");
     c1->Print("Invariant mass of concordant particles.root");
     c1->Print("Invariant mass of concordant particles.C");
 
-    TCanvas* c2 = new TCanvas("Invariant mass of discordant particles", "Invariant mass of discordant particles",800,600);
-    HistoInvMassDiscordant->GetYaxis()->SetTitle("Invariant mass (GeV/c^2)");
-    HistoInvMassDiscordant->GetXaxis()->SetTitle("Entries");
-    HistoInvMassDiscordant->SetFillColor(kBlue);
+    TCanvas* c2 = new TCanvas("Invariant mass distribution of discordant particles", "Invariant mass of discordant particles",800,600);
+    setStyle(HistoInvMassDiscordant,"Invariant mass distribution of discordant particles","Invariant mass (GeV/c^2)");
     HistoInvMassDiscordant->Draw("HIST");
     c2->Print("Invariant mass of discordant particles.pdf");
     c2->Print("Invariant mass of discordant particles.root");
@@ -103,9 +105,7 @@ void analysis() {
     "K* lenght according to first histograms difference: (" << Gaus->GetParameter(2) << " +/- " << Gaus->GetParError(2) << ") GeV/c^2 \n" <<
      "                chi2/NDF = " << Gaus->GetChisquare()/Gaus->GetNDF() <<  ", probability: " << Gaus->GetProb() << '\n' <<
     "**************************************************************************" << '\n';
-    HistoDifference->GetYaxis()->SetTitle("Invariant mass (GeV/c^2)");
-    HistoDifference->GetXaxis()->SetTitle("Entries");
-    HistoDifference->SetFillColor(kBlue);
+    setStyle(HistoDifference,"Difference histogram, concordant-discordant particles","Invariant mass (GeV/c^2)");
     HistoDifference->Draw("HIST");
     HistoDifference->Draw("SAME,FUNC");
     c3->Print("Difference histogram, concordant-discordant.pdf");
@@ -114,18 +114,14 @@ void analysis() {
 
 
     TCanvas* c4 = new TCanvas("Invariant mass of #pi-k concordant particles", "Invariant mass of #pi-k concordant particles",800,600);
-    HistoInvMassPionPKaonN->GetYaxis()->SetTitle("Invariant mass (GeV/c^2)");
-    HistoInvMassPionPKaonN->GetXaxis()->SetTitle("Entries");
-    HistoInvMassPionPKaonN->SetFillColor(kBlue);
+    setStyle(HistoInvMassPionPKaonN, "Invariant mass distribution of concordant #pi-K particles", "Invariant mass (GeV/c^2)" );
     HistoInvMassPionPKaonN->Draw("HIST");
     c4->Print("Invariant mass of #pi-k concordant particles.pdf");
     c4->Print("Invariant mass of #pi-k concordant particles.root");
     c4->Print("Invariant mass of #pi-k concordant particles.C");
 
     TCanvas* c5 = new TCanvas("Invariant mass of #pi/k discordant particles", "Invariant mass of #pi-k discordant particles",800,600);
-    HistoInvMassPionNKaonP->GetYaxis()->SetTitle("Invariant mass (GeV/c^2)");
-    HistoInvMassPionNKaonP->GetXaxis()->SetTitle("Entries");
-    HistoInvMassPionNKaonP->SetFillColor(kBlue);
+    setStyle(HistoInvMassPionNKaonP, "Invariant mass distribution of discordant #pi-K particles", "Invariant mass (GeV/c^2)" );
     HistoInvMassPionNKaonP->Draw("HIST");
     c5->Print("Invariant mass of #pi-k discordant particle.pdf");
     c5->Print("Invariant mass of #pi-k discordant particle.root");
@@ -140,9 +136,7 @@ void analysis() {
     "K* lenght according to second histograms difference: (" << Gaus->GetParameter(2) << " +/- " << Gaus->GetParError(2) << ") GeV/c^2 \n" <<
      "                chi2/NDF = " << Gaus->GetChisquare()/Gaus->GetNDF() << ", probability: " << Gaus->GetProb() << '\n' <<
     "**************************************************************************" << '\n';
-    HistoDifference1->GetXaxis()->SetTitle("Invariant mass (GeV/c^2)");
-    HistoDifference1->GetXaxis()->SetTitle("Entries");
-    HistoDifference1->SetFillColor(kBlue);
+    setStyle(HistoDifference1, "Difference histogram, concordant-discordant #pi-K particles","Invariant mass (GeV/c^2)" );
     HistoDifference1->Draw("HIST");
     HistoDifference1->Draw("SAME,FUNC");
     c6->Print("Difference histogram Pi-K, concordant-discordant.pdf");
@@ -163,9 +157,7 @@ void analysis() {
     "K* lenght according to daughter particles histograms: (" << Gaus2->GetParameter(2) << " +/- " << Gaus2->GetParError(2) << ") GeV/c^2 \n" <<
      "                chi2/NDF = " << Gaus2->GetChisquare()/Gaus2->GetNDF() << ", probability: " << Gaus2->GetProb() << '\n' <<
     "**************************************************************************" << '\n';
-    HistoInvMassDecayed->GetXaxis()->SetTitle("Invariant mass (GeV/c^2)");
-    HistoInvMassDecayed->GetXaxis()->SetTitle("Entries");
-    HistoInvMassDecayed->SetFillColor(kBlue);
+    setStyle(HistoInvMassDecayed, "Invariant mass distribution of daughter particles", "Invariant mass (GeV/c^2)");
     HistoInvMassDecayed->Draw("HIST");
     HistoInvMassDecayed->Draw("SAME,FUNC");
     c7->Print("Difference histogram Pi-K, concordant-discordant.pdf");
