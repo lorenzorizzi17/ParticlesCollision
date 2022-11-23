@@ -50,54 +50,70 @@ void analysis() {
     "PROPORTIONS OF GENERATED PARTICLES: '\n'" <<
     "N. of pions generated: " << HistoParticleType->GetBinContent(1) << " +/- " << HistoParticleType->GetBinError(1) << '\n'<<
     "N. of antipions generated: " << HistoParticleType->GetBinContent(2) << " +/- " << HistoParticleType->GetBinError(2) << '\n' <<
-    "N. of protons generated: " << HistoParticleType->GetBinContent(3) << " +/- " << HistoParticleType->GetBinError(3) << '\n' <<
-    "N. of antiprotons generated: " << HistoParticleType->GetBinContent(4) << " +/- " << HistoParticleType->GetBinError(4) << '\n' <<
-    "N. of kaons generated: " << HistoParticleType->GetBinContent(5) << " +/- " << HistoParticleType->GetBinError(5) << '\n' <<
-    "N. of antikaons generated: " << HistoParticleType->GetBinContent(6) << " +/- " << HistoParticleType->GetBinError(6) << '\n' <<
+    "N. of kaons generated: " << HistoParticleType->GetBinContent(3) << " +/- " << HistoParticleType->GetBinError(3) << '\n' <<
+    "N. of antikaons generated: " << HistoParticleType->GetBinContent(4) << " +/- " << HistoParticleType->GetBinError(4) << '\n' <<
+    "N. of protons generated: " << HistoParticleType->GetBinContent(5) << " +/- " << HistoParticleType->GetBinError(5) << '\n' <<
+    "N. of antiprotons generated: " << HistoParticleType->GetBinContent(6) << " +/- " << HistoParticleType->GetBinError(6) << '\n' <<
     "N. of kaons * generated: " << HistoParticleType->GetBinContent(7) << " +/- " << HistoParticleType->GetBinError(7) << '\n' <<
     "**************************************************************************\n" ;
 
-
-    TF1* UniformFunctionPolar = new TF1("Uniform Function Polar", "[0]", 0, M_PI);
+    //creating a canvas to display particle type, angle and momentum distribution
+    TCanvas* c = new TCanvas("r","r",800,600);
+    c->Divide(2,2);
+    c->cd(1);
+    //particle type distribution
+    setStyle(HistoParticleType, "Particle type distribution", "Particle type");
+    HistoParticleType->Draw("HIST");
+    //polar&azimuthal angle distribution
+    c->cd(2);
     TF1* UniformFunctionAzimuthal = new TF1("Uniform Function Azimuthal", "[0]",0,2*M_PI);
     HistoAzimuthalAngle->Fit(UniformFunctionAzimuthal, "Q");
+    gStyle->SetOptFit(1111);
+    setStyle(HistoAzimuthalAngle, "Azimuthal angle distribution", "Angolo #theta");
+    HistoAzimuthalAngle->Draw("HIST");
+    HistoAzimuthalAngle->Draw("SAME,FUNC");
+    c->cd(3);
+    TF1* UniformFunctionPolar = new TF1("Uniform Function Polar", "[0]", 0, M_PI);
     HistoPolarAngle->Fit(UniformFunctionPolar, "Q");
+    setStyle(HistoPolarAngle, "Polar angle distribution", "Angolo #phi");
+    HistoPolarAngle->Draw("HIST");
+    HistoPolarAngle->Draw("SAME,FUNC");
     std::cout << "**************************************************************************" << '\n' <<
     "Azimuthal angle fitting: " << UniformFunctionAzimuthal->GetParameter(0) << " +/- " << UniformFunctionAzimuthal->GetParError(0) <<
-     "                chi2/NDF = " << UniformFunctionAzimuthal->GetChisquare()/UniformFunctionAzimuthal->GetNDF()  << ", probability: " << UniformFunctionAzimuthal->GetProb() << '\n' <<
+     "                chi2/NDF = " << UniformFunctionAzimuthal->GetChisquare()/UniformFunctionAzimuthal->GetNDF()  << ", chi2 = " << UniformFunctionAzimuthal->GetChisquare() << " probability: " << UniformFunctionAzimuthal->GetProb() << '\n' <<
     "Polar angle fitting: " << UniformFunctionPolar->GetParameter(0) << " +/- " << UniformFunctionPolar->GetParError(0) <<
-    "                chi2/NDF = " << UniformFunctionPolar->GetChisquare()/UniformFunctionPolar->GetNDF() << ", probability: " << UniformFunctionPolar->GetProb() << '\n' <<
+    "                chi2/NDF = " << UniformFunctionPolar->GetChisquare()/UniformFunctionPolar->GetNDF() << ", chi2 = " << UniformFunctionPolar->GetChisquare() << "probability: " << UniformFunctionPolar->GetProb() << '\n' <<
     "**************************************************************************" << '\n' ;
 
-
+    //momentum distribution
+    c->cd(4);
     TF1* ExpoFunction = new TF1("Expo function", "[0]*exp(-[1]*x)",0,3);
     HistoMomentum->Fit(ExpoFunction, "QQQ");
+    setStyle(HistoMomentum, "Particles momentum distribution", "Momentum (GeV)");
+    HistoMomentum->Draw("HIST");
+    HistoMomentum->Draw("SAME,FUNC");
     std::cout << "**************************************************************************" << '\n' <<
-    "Mean momentum of generated particles: " << ExpoFunction->GetParameter(1) <<
-     "                chi2/NDF = " << ExpoFunction->GetChisquare()/ExpoFunction->GetNDF() << ", probability: " << ExpoFunction->GetProb() << '\n' <<
+    "Mean momentum of generated particles: " << ExpoFunction->GetParameter(1) << "+/-" << ExpoFunction->GetParError(1) <<
+     "                chi2/NDF = " << ExpoFunction->GetChisquare()/ExpoFunction->GetNDF() << ",chi2 : " << ExpoFunction->GetChisquare() << ", probability: " << ExpoFunction->GetProb() << '\n' <<
     "**************************************************************************" << '\n';
+    //saving this canvas
+    c->Print("Canvas1.pdf");
+    c->Print("Canvas1.root");
+    c->Print("Canvas1.C");
+    c->Print("Canvas1.tex");
 
+    
+    
 
+    //saving and displaying inv. mass distribution
+    TCanvas* c1 = new TCanvas("","",1000,800);
+    c1->Divide(2,2);
+    c1->cd(1);
+    TH1F* HistoDifference = new TH1F("Difference histogram, concordant/discordant", "Difference histogram, discordant-concordant",150,0,3);
     TF1* Gaus = new TF1("Gaus", "[0]*exp(-((x-[1])^2)/(2*[2]^2))",0.5,1.1);
     Gaus->SetParameter(0,17000);
     Gaus->SetParameter(1,0.9);
     Gaus->SetParameter(2,0.5);
-
-    TCanvas* c1 = new TCanvas("Invariant mass of distribution concordant particles","Invariant mass distribution of concordant particles",800,600);
-    setStyle(HistoInvMassConcordant,"Invariant mass distribution of concordant particles","Invariant mass (GeV/c^2)");
-    c1->Print("Invariant mass of concordant particles.pdf");
-    c1->Print("Invariant mass of concordant particles.root");
-    c1->Print("Invariant mass of concordant particles.C");
-
-    TCanvas* c2 = new TCanvas("Invariant mass distribution of discordant particles", "Invariant mass of discordant particles",800,600);
-    setStyle(HistoInvMassDiscordant,"Invariant mass distribution of discordant particles","Invariant mass (GeV/c^2)");
-    HistoInvMassDiscordant->Draw("HIST");
-    c2->Print("Invariant mass of discordant particles.pdf");
-    c2->Print("Invariant mass of discordant particles.root");
-    c2->Print("Invariant mass of discordant particles.C");
-
-    TCanvas* c3 = new TCanvas("Difference histogram, concordant-discordant", "Difference histogram, concordant-discordant", 800,600);
-    TH1F* HistoDifference = new TH1F("Difference histogram, concordant/discordant", "Difference histogram, discordant-concordant",150,0,3);
     HistoDifference->Add(HistoInvMassDiscordant,HistoInvMassConcordant,1,-1);
     HistoDifference->Fit(Gaus, "Q");
     std::cout << "**************************************************************************" << '\n' <<
@@ -108,26 +124,7 @@ void analysis() {
     setStyle(HistoDifference,"Difference histogram, concordant-discordant particles","Invariant mass (GeV/c^2)");
     HistoDifference->Draw("HIST");
     HistoDifference->Draw("SAME,FUNC");
-    c3->Print("Difference histogram, concordant-discordant.pdf");
-    c3->Print("Difference histogram, concordant-discordant.root");
-    c3->Print("Difference histogram, concordant-discordant.C");
-
-
-    TCanvas* c4 = new TCanvas("Invariant mass of #pi-k concordant particles", "Invariant mass of #pi-k concordant particles",800,600);
-    setStyle(HistoInvMassPionPKaonN, "Invariant mass distribution of concordant #pi-K particles", "Invariant mass (GeV/c^2)" );
-    HistoInvMassPionPKaonN->Draw("HIST");
-    c4->Print("Invariant mass of #pi-k concordant particles.pdf");
-    c4->Print("Invariant mass of #pi-k concordant particles.root");
-    c4->Print("Invariant mass of #pi-k concordant particles.C");
-
-    TCanvas* c5 = new TCanvas("Invariant mass of #pi/k discordant particles", "Invariant mass of #pi-k discordant particles",800,600);
-    setStyle(HistoInvMassPionNKaonP, "Invariant mass distribution of discordant #pi-K particles", "Invariant mass (GeV/c^2)" );
-    HistoInvMassPionNKaonP->Draw("HIST");
-    c5->Print("Invariant mass of #pi-k discordant particle.pdf");
-    c5->Print("Invariant mass of #pi-k discordant particle.root");
-    c5->Print("Invariant mass of #pi-k discordant particle.C");
-
-    TCanvas* c6 = new TCanvas("Difference histogram Pi-K, concordant-discordant","Difference histogram Pi-K, concordant-discordant",800,600);
+    c1->cd(2);
     TH1F* HistoDifference1 = new TH1F("Difference histogram Pi-K, concordant-discordant", "Difference histogram Pi-K, discordant-concordant",150,0,3);
     HistoDifference1->Add(HistoInvMassPionPKaonN,HistoInvMassPionNKaonP,-1,1);
     HistoDifference1->Fit(Gaus, "QR");
@@ -139,11 +136,7 @@ void analysis() {
     setStyle(HistoDifference1, "Difference histogram, concordant-discordant #pi-K particles","Invariant mass (GeV/c^2)" );
     HistoDifference1->Draw("HIST");
     HistoDifference1->Draw("SAME,FUNC");
-    c6->Print("Difference histogram Pi-K, concordant-discordant.pdf");
-    c6->Print("Difference histogram Pi-K, concordant-discordant.C");
-    c6->Print("Difference histogram Pi-K, concordant-discordant.root");
-
-    TCanvas* c7 = new TCanvas("Invariant mass of daughter particles coupled","Invariant mass of daughter particles coupled",800,600);
+    c1->cd(3);
     TF1* Gaus2 = new TF1("Gaus2", "[0]*exp(-((x-[1])^2)/(2*[2]^2))",0.5,1.1);
     Gaus2->SetParameter(0,12000);
     Gaus2->SetParameter(1,0.8);
@@ -160,7 +153,9 @@ void analysis() {
     setStyle(HistoInvMassDecayed, "Invariant mass distribution of daughter particles", "Invariant mass (GeV/c^2)");
     HistoInvMassDecayed->Draw("HIST");
     HistoInvMassDecayed->Draw("SAME,FUNC");
-    c7->Print("Difference histogram Pi-K, concordant-discordant.pdf");
-    c7->Print("Difference histogram Pi-K, concordant-discordant.C");
-    c7->Print("Difference histogram Pi-K, concordant-discordant.root");
+    c1->Print("Invariant mass distribution.pdf");
+    c1->Print("Invariant mass distribution.C");
+    c1->Print("Invariant mass distribution.root");
+    c1->Print("Invariant mass distribution.tex");
+
 }
